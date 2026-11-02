@@ -358,17 +358,28 @@
 
         #fornecedor_info {
             display: none;
-            margin-top: 18px;
-            padding: 12px 14px;
-            border-radius: 14px;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            padding: 10px 12px;
+            border-radius: 999px;
             background: rgba(122, 162, 255, 0.08);
             border: 1px solid rgba(122, 162, 255, 0.2);
             color: #dce8ff;
-            font-size: 0.86rem;
+            font-size: 0.76rem;
+            line-height: 1.4;
+            max-width: 100%;
         }
 
         #fornecedor_info.visible {
-            display: block;
+            display: inline-flex;
+        }
+
+        .fornecedor-label {
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text-muted);
         }
 
         .results-panel {
@@ -379,12 +390,19 @@
 
         .results-header {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             justify-content: space-between;
             gap: 16px;
             padding: 22px 22px 18px;
             border-bottom: 1px solid var(--border);
             background: rgba(7, 15, 27, 0.4);
+        }
+
+        .results-meta {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 10px;
         }
 
         .results-kicker {
@@ -659,7 +677,6 @@
                             <input type="file" id="xml_file" accept=".xml" class="hidden" />
                         </label>
 
-                        <div id="fornecedor_info"></div>
                     </div>
                 </section>
             </aside>
@@ -671,9 +688,12 @@
                             <p class="results-kicker">Resultado</p>
                             <h2>Produtos e sugestão de venda</h2>
                         </div>
-                        <div class="results-tags">
-                            <span class="tiny-tag tiny-tag--green">Ajuste livre</span>
-                            <span class="tiny-tag tiny-tag--purple">Markup ativo</span>
+                        <div class="results-meta">
+                            <div id="fornecedor_info"></div>
+                            <div class="results-tags">
+                                <span class="tiny-tag tiny-tag--green">Ajuste livre</span>
+                                <span class="tiny-tag tiny-tag--purple">Markup ativo</span>
+                            </div>
                         </div>
                     </div>
 
@@ -681,14 +701,6 @@
                         <div class="stat-card">
                             <span class="stat-label">Itens</span>
                             <strong id="total_itens">0</strong>
-                        </div>
-                        <div class="stat-card">
-                            <span class="stat-label">Custo médio</span>
-                            <strong id="custo_medio" class="mono">R$ 0,00</strong>
-                        </div>
-                        <div class="stat-card">
-                            <span class="stat-label">Preço sugerido</span>
-                            <strong id="preco_medio" class="mono" style="color: var(--success);">R$ 0,00</strong>
                         </div>
                     </div>
 
@@ -788,19 +800,19 @@
 
         function renderizarDados(dados) {
             const fInfo = document.getElementById('fornecedor_info');
-            fInfo.innerHTML = `<strong>Fornecedor:</strong> ${dados.fornecedor.razao_social} <span style="opacity:.75; margin: 0 8px;">|</span> <strong>CNPJ:</strong> ${dados.fornecedor.cnpj}`;
+            fInfo.innerHTML = `
+                <span class="fornecedor-label">Fornecedor:</span>
+                <span>${dados.fornecedor.razao_social}</span>
+                <span style="opacity:.75;">|</span>
+                <span class="fornecedor-label">CNPJ:</span>
+                <span>${dados.fornecedor.cnpj}</span>
+            `;
             fInfo.classList.add('visible');
 
             const tbody = document.getElementById('produtos_tabela_body');
             tbody.innerHTML = '';
 
-            let custoTotal = 0;
-            let sugeridoTotal = 0;
-
             dados.produtos.forEach((prod) => {
-                custoTotal += prod.custo_unitario_real;
-                sugeridoTotal += prod.preco_venda_sugerido;
-
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>
@@ -822,9 +834,6 @@
 
             const totalItens = dados.produtos.length;
             document.getElementById('total_itens').textContent = totalItens;
-            document.getElementById('custo_medio').textContent = `R$ ${(custoTotal / totalItens || 0).toFixed(2).replace('.', ',')}`;
-            document.getElementById('preco_medio').textContent = `R$ ${(sugeridoTotal / totalItens || 0).toFixed(2).replace('.', ',')}`;
-
             document.getElementById('resultado_container').classList.remove('hidden');
         }
     </script>
