@@ -51,10 +51,8 @@ O cálculo usa uma lógica de markup com base na soma dessas porcentagens, retor
 ### 6. Exibição no frontend
 O frontend mostra:
 
-- fornecedor e CNPJ
+- fornecedor e CNPJ no cabeçalho dos resultados
 - quantidade de itens
-- custo médio
-- preço sugerido médio
 - tabela com todos os produtos, custo da nota, custo real e preço sugerido
 
 ---
