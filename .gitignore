@@ -1,0 +1,15 @@
+# Ignorar arquivos de ambiente com senhas
+.env
+
+# Ignorar pastas de dependências
+node_modules/
+
+# Ignorar arquivos temporários do sistema
+.DS_Store
+Thumbs.db
+
+# Ignorar todos os arquivos com extensão .log
+*.log
+
+# Ignorar modulos do python
+_*
