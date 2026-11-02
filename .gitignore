@@ -13,3 +13,6 @@ Thumbs.db
 
 # Ignorar modulos do python
 _*
+
+# Arquivos de xml (NF)
+/xml/*.xml
