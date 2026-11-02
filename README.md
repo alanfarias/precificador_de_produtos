@@ -169,10 +169,14 @@ http://127.0.0.1:8001
    - Simples Nacional
    - Taxa do Cartão
    - Lucro Desejado
-2. Clique em "Importar XML"
-3. Selecione o arquivo `.xml` da NF-e
-4. O backend processa o arquivo e exibe os produtos
-5. Confira o custo real, preço sugerido e tabela de itens
+2. Use a calculadora de despesas fixas para descobrir o percentual ideal:
+   - informe as despesas fixas mensais
+   - informe o faturamento mensal estimado
+   - o sistema calcula automaticamente a porcentagem e pode aplicá-la ao campo "Despesas Fixas (%)"
+3. Clique em "Importar XML"
+4. Selecione o arquivo `.xml` da NF-e
+5. O backend processa o arquivo e exibe os produtos
+6. Confira o custo real, preço sugerido e tabela de itens
 
 ---
 

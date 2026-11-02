@@ -213,6 +213,58 @@
             gap: 16px;
         }
 
+        .helper-card {
+            margin-top: 20px;
+            padding: 16px;
+            border-radius: 18px;
+            border: 1px solid rgba(122, 162, 255, 0.18);
+            background: rgba(122, 162, 255, 0.06);
+        }
+
+        .helper-card h3 {
+            margin: 0 0 12px;
+            font-size: 0.92rem;
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .helper-output {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 16px;
+            padding: 12px 14px;
+            border-radius: 12px;
+            background: rgba(11, 18, 29, 0.9);
+            border: 1px solid rgba(148,163,184,.18);
+        }
+
+        .helper-output strong {
+            font-size: 1.05rem;
+            color: var(--success);
+            font-family: "SFMono-Regular", Consolas, monospace;
+        }
+
+        .action-button {
+            margin-top: 14px;
+            width: 100%;
+            border: 0;
+            border-radius: 12px;
+            padding: 11px 14px;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            color: #05111c;
+            background: linear-gradient(135deg, #7aa2ff, #a3c9ff);
+            cursor: pointer;
+            transition: transform 0.18s ease, box-shadow 0.18s ease;
+            box-shadow: 0 10px 22px rgba(122, 162, 255, 0.2);
+        }
+
+        .action-button:hover {
+            transform: translateY(-1px);
+        }
+
         .field {
             display: flex;
             flex-direction: column;
@@ -558,7 +610,7 @@
                             </div>
                             <div class="field">
                                 <label class="label" for="pct_simples">Simples Nacional (%)</label>
-                                <input class="input-shell" type="number" id="pct_simples" value="4.0" step="0.1">
+                                <input class="input-shell" type="number" id="pct_simples" value="8.32" step="0.1">
                             </div>
                             <div class="field">
                                 <label class="label" for="pct_cartao">Taxa do Cartão (%)</label>
@@ -568,6 +620,23 @@
                                 <label class="label" for="pct_lucro">Lucro Desejado (%)</label>
                                 <input class="input-shell" type="number" id="pct_lucro" value="20.0" step="0.1">
                             </div>
+                        </div>
+
+                        <div class="helper-card">
+                            <h3>Calculadora de despesas fixas</h3>
+                            <div class="field">
+                                <label class="label" for="despesas_fixas_mensais">Despesas fixas mensais (R$)</label>
+                                <input class="input-shell" type="number" id="despesas_fixas_mensais" value="5000" min="0" step="0.01">
+                            </div>
+                            <div class="field" style="margin-top: 12px;">
+                                <label class="label" for="faturamento_mensal">Faturamento mensal estimado (R$)</label>
+                                <input class="input-shell" type="number" id="faturamento_mensal" value="30000" min="0" step="0.01">
+                            </div>
+                            <div class="helper-output">
+                                <span class="label">Percentual sugerido</span>
+                                <strong id="percentual_despesas_fixas">16,67%</strong>
+                            </div>
+                            <button type="button" id="aplicar_pct_fixo" class="action-button">Usar no cálculo</button>
                         </div>
                     </div>
                 </section>
@@ -647,6 +716,35 @@
 
         const fileInput = document.getElementById('xml_file');
         const fileNameBox = document.getElementById('file_name');
+        const pctFixoInput = document.getElementById('pct_fixo');
+        const despesasFixasMensaisInput = document.getElementById('despesas_fixas_mensais');
+        const faturamentoMensalInput = document.getElementById('faturamento_mensal');
+        const percentualDespesasFixasLabel = document.getElementById('percentual_despesas_fixas');
+        const aplicarPctFixoButton = document.getElementById('aplicar_pct_fixo');
+
+        function calcularPercentualDespesasFixas() {
+            const despesasFixasMensais = Number(despesasFixasMensaisInput.value) || 0;
+            const faturamentoMensal = Number(faturamentoMensalInput.value) || 0;
+
+            if (faturamentoMensal <= 0) {
+                percentualDespesasFixasLabel.textContent = '0,00%';
+                return 0;
+            }
+
+            const percentual = (despesasFixasMensais / faturamentoMensal) * 100;
+            percentualDespesasFixasLabel.textContent = `${percentual.toFixed(2).replace('.', ',')}%`;
+            return percentual;
+        }
+
+        despesasFixasMensaisInput.addEventListener('input', calcularPercentualDespesasFixas);
+        faturamentoMensalInput.addEventListener('input', calcularPercentualDespesasFixas);
+
+        aplicarPctFixoButton.addEventListener('click', () => {
+            const percentual = calcularPercentualDespesasFixas();
+            pctFixoInput.value = percentual.toFixed(2);
+        });
+
+        calcularPercentualDespesasFixas();
 
         fileInput.addEventListener('change', async (event) => {
             const file = event.target.files[0];
