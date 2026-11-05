@@ -72,6 +72,17 @@ async def processar_xml(
             
             v_prod_item = float(prod.find('ns:vProd', ns).text)
             qtd = float(prod.find('ns:qCom', ns).text)
+
+            codigo_ean = None
+            ean_node = prod.find('ns:cEAN', ns)
+            if ean_node is not None and ean_node.text:
+                codigo_ean = ean_node.text
+            else:
+                ean_trib_node = prod.find('ns:cEANTrib', ns)
+                if ean_trib_node is not None and ean_trib_node.text:
+                    codigo_ean = ean_trib_node.text
+            if codigo_ean is None:
+                codigo_ean = prod.find('ns:cProd', ns).text
             
             # Rateio do Frete/Seguro proporcional
             proporcao = v_prod_item / v_prod_total if v_prod_total > 0 else 0
@@ -94,7 +105,8 @@ async def processar_xml(
             preco_venda_sugerido = custo_unitario_real / (1 - soma_percentuais)
             
             produtos.append({
-                "codigo": prod.find('ns:cProd', ns).text,
+                "codigo": codigo_ean,
+                "codigo_interno": prod.find('ns:cProd', ns).text,
                 "descricao": prod.find('ns:xProd', ns).text,
                 "custo_unitario_xml": float(prod.find('ns:vUnCom', ns).text),
                 "custo_unitario_real": round(custo_unitario_real, 2),
