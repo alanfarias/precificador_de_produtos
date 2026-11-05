@@ -497,6 +497,26 @@
             background: rgba(109, 227, 166, 0.12);
         }
 
+        .copy-price-button {
+            border: 1px solid rgba(122, 162, 255, 0.3);
+            background: rgba(122, 162, 255, 0.08);
+            color: #dfe9ff;
+            border-radius: 10px;
+            padding: 8px 10px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+        }
+
+        .copy-price-button:hover {
+            transform: translateY(-1px);
+            border-color: rgba(122, 162, 255, 0.55);
+            background: rgba(122, 162, 255, 0.14);
+        }
+
         .stats-grid {
             display: flex;
             flex-wrap: wrap;
@@ -1108,6 +1128,26 @@
             URL.revokeObjectURL(link.href);
         }
 
+        async function copiarValorFinal(valor) {
+            const texto = String(Number(valor ?? 0)).replace('.', ',');
+
+            try {
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(texto);
+                    return;
+                }
+
+                const area = document.createElement('textarea');
+                area.value = texto;
+                document.body.appendChild(area);
+                area.select();
+                document.execCommand('copy');
+                document.body.removeChild(area);
+            } catch (error) {
+                console.error('Falha ao copiar valor final:', error);
+            }
+        }
+
         document.getElementById('exportar_csv_button').addEventListener('click', exportarProdutosCsv);
 
         function renderizarDados(dados) {
@@ -1148,6 +1188,7 @@
                             <span>R$</span>
                             <input type="text" class="final-input" value="${formatarValorInputMoeda(precoFinal)}">
                         </div>
+                        <button type="button" class="copy-price-button" data-index="${index}">Copiar</button>
                     </td>
                 `;
 
@@ -1156,6 +1197,16 @@
                 finalInput.addEventListener('blur', () => {
                     produtosAtuais[index].preco_final = parseValorMonetario(finalInput.value);
                     atualizarResumoFinanceiro();
+                });
+
+                const copyButton = tr.querySelector('.copy-price-button');
+                copyButton.addEventListener('click', async () => {
+                    await copiarValorFinal(produtosAtuais[index].preco_final);
+                    const originalText = copyButton.textContent;
+                    copyButton.textContent = 'Copiado';
+                    setTimeout(() => {
+                        copyButton.textContent = originalText;
+                    }, 900);
                 });
                 tbody.appendChild(tr);
             });
