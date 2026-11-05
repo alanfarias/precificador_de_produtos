@@ -97,7 +97,7 @@ notaFiscal/
 ## 1. Entrar na pasta do projeto
 
 ```bash
-cd /home/alan/Desenv/Jerusalem/notaFiscal
+cd /home/alan/Desenv/Jerusalem/precificador_de_produtos
 ```
 
 ## 2. Criar ou ativar o ambiente virtual
@@ -131,7 +131,7 @@ pip install -r requirements.txt
 No terminal, execute:
 
 ```bash
-python main.py
+python3 main.py
 ```
 
 Isso inicia o servidor FastAPI em:
