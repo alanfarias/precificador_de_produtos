@@ -498,22 +498,25 @@
         }
 
         .copy-price-button {
-            border: 1px solid rgba(122, 162, 255, 0.3);
+            border: 1px solid rgba(122, 162, 255, 0.26);
             background: rgba(122, 162, 255, 0.08);
             color: #dfe9ff;
-            border-radius: 10px;
-            padding: 8px 10px;
-            font-size: 0.7rem;
+            border-radius: 8px;
+            padding: 6px 8px;
+            font-size: 0.62rem;
             font-weight: 700;
             letter-spacing: 0.08em;
             text-transform: uppercase;
             cursor: pointer;
             transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+            white-space: nowrap;
+            line-height: 1.2;
+            flex-shrink: 0;
         }
 
         .copy-price-button:hover {
             transform: translateY(-1px);
-            border-color: rgba(122, 162, 255, 0.55);
+            border-color: rgba(122, 162, 255, 0.5);
             background: rgba(122, 162, 255, 0.14);
         }
 
@@ -623,9 +626,9 @@
         }
 
         tbody td {
-            padding: 16px 18px;
+            padding: 10px 12px;
             border-bottom: 1px solid var(--border);
-            vertical-align: top;
+            vertical-align: middle;
             color: var(--text-soft);
         }
 
@@ -663,31 +666,34 @@
 
         .final-input {
             width: 100%;
-            min-width: 140px;
-            border-radius: 12px;
+            min-width: 110px;
+            border-radius: 10px;
             border: 1px solid rgba(109, 227, 166, 0.25);
             background: rgba(9, 17, 26, 0.9);
             color: #dfffea;
-            padding: 10px 12px 10px 42px;
+            padding: 8px 10px 8px 34px;
             outline: none;
             font-family: "SFMono-Regular", Consolas, monospace;
             text-align: right;
+            font-size: 0.82rem;
         }
 
         .final-input-wrap {
             position: relative;
             display: block;
+            min-width: 110px;
         }
 
         .final-input-wrap span {
             position: absolute;
-            left: 12px;
+            left: 10px;
             top: 50%;
             transform: translateY(-50%);
             color: var(--text-muted);
             font-family: "SFMono-Regular", Consolas, monospace;
             z-index: 1;
             pointer-events: none;
+            font-size: 0.75rem;
         }
 
         @media (max-width: 1100px) {
@@ -1184,11 +1190,13 @@
                     <td class="mono">${formatarMoeda(prod.custo_unitario_real)}</td>
                     <td class="mono price-suggested">${formatarMoeda(prod.preco_venda_sugerido)}</td>
                     <td>
-                        <div class="final-input-wrap">
-                            <span>R$</span>
-                            <input type="text" class="final-input" value="${formatarValorInputMoeda(precoFinal)}">
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <div class="final-input-wrap">
+                                <span>R$</span>
+                                <input type="text" class="final-input" value="${formatarValorInputMoeda(precoFinal)}">
+                            </div>
+                            <button type="button" class="copy-price-button" data-index="${index}">Copiar</button>
                         </div>
-                        <button type="button" class="copy-price-button" data-index="${index}">Copiar</button>
                     </td>
                 `;
 
