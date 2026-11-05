@@ -834,6 +834,7 @@
     <script>
         const API_URL = 'http://127.0.0.1:8000/api/processar-xml';
         let produtosAtuais = [];
+        let dadosFornecedor = null;
 
         function parseValorMonetario(valor) {
             if (valor === null || valor === undefined || valor === '') {
@@ -1059,6 +1060,16 @@
                 return;
             }
 
+            const nomeArquivoXml = fileNameBox.textContent || 'produto_xml';
+            const fornecedorNome = dadosFornecedor?.razao_social || 'N/A';
+            const fornecedorCnpj = dadosFornecedor?.cnpj || 'N/A';
+
+            const legenda = [
+                `nome_arquivo_xml;${escaparCsv(nomeArquivoXml)}`,
+                `fornecedor;${escaparCsv(fornecedorNome)}`,
+                `cnpj_fornecedor;${escaparCsv(fornecedorCnpj)}`
+            ];
+
             const cabecalho = [
                 'codigo',
                 'descricao',
@@ -1068,7 +1079,11 @@
                 'preco_final'
             ];
 
-            const linhas = [cabecalho.join(';')];
+            const linhas = [
+                ...legenda,
+                '',
+                cabecalho.join(';')
+            ];
 
             produtosAtuais.forEach((produto) => {
                 const linha = [
@@ -1086,7 +1101,7 @@
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = 'produtos_exportados.csv';
+            link.download = `${nomeArquivoXml.replace(/\.[^/.]+$/, '')}_produtos.csv`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -1096,6 +1111,8 @@
         document.getElementById('exportar_csv_button').addEventListener('click', exportarProdutosCsv);
 
         function renderizarDados(dados) {
+            dadosFornecedor = dados.fornecedor || null;
+
             const fInfo = document.getElementById('fornecedor_info');
             fInfo.innerHTML = `
                 <span class="fornecedor-label">Fornecedor:</span>
