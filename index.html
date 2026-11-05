@@ -477,6 +477,26 @@
             border-color: rgba(168, 85, 247, 0.2);
         }
 
+        .export-button {
+            border: 1px solid rgba(109, 227, 166, 0.35);
+            background: rgba(109, 227, 166, 0.08);
+            color: #dffdf0;
+            border-radius: 12px;
+            padding: 10px 14px;
+            font-weight: 700;
+            font-size: 0.76rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+        }
+
+        .export-button:hover {
+            transform: translateY(-1px);
+            border-color: rgba(109, 227, 166, 0.55);
+            background: rgba(109, 227, 166, 0.12);
+        }
+
         .stats-grid {
             display: flex;
             flex-wrap: wrap;
@@ -777,6 +797,7 @@
                                 <span class="tiny-tag tiny-tag--green">Ajuste livre</span>
                                 <span class="tiny-tag tiny-tag--purple">Markup ativo</span>
                             </div>
+                            <button type="button" class="export-button" id="exportar_csv_button">Exportar CSV</button>
                         </div>
                     </div>
 
@@ -1015,6 +1036,64 @@
                 totalItensEl.textContent = totalItens;
             }
         }
+
+        function escaparCsv(valor) {
+            const texto = String(valor ?? '');
+            return `"${texto.replace(/"/g, '""')}"`;
+        }
+
+        function formatarNumeroCsv(valor) {
+            const numero = Number(valor ?? 0);
+            if (!Number.isFinite(numero)) {
+                return '0';
+            }
+            return numero.toLocaleString('pt-BR', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+                useGrouping: false
+            });
+        }
+
+        function exportarProdutosCsv() {
+            if (!Array.isArray(produtosAtuais) || produtosAtuais.length === 0) {
+                return;
+            }
+
+            const cabecalho = [
+                'codigo',
+                'descricao',
+                'custo_unitario_xml',
+                'custo_unitario_real',
+                'preco_venda_sugerido',
+                'preco_final'
+            ];
+
+            const linhas = [cabecalho.join(';')];
+
+            produtosAtuais.forEach((produto) => {
+                const linha = [
+                    escaparCsv(produto.codigo),
+                    escaparCsv(produto.descricao),
+                    formatarNumeroCsv(produto.custo_unitario_xml),
+                    formatarNumeroCsv(produto.custo_unitario_real),
+                    formatarNumeroCsv(produto.preco_venda_sugerido),
+                    formatarNumeroCsv(produto.preco_final)
+                ].join(';');
+                linhas.push(linha);
+            });
+
+            const csv = `\uFEFF${linhas.join('\n')}`;
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'produtos_exportados.csv';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(link.href);
+        }
+
+        document.getElementById('exportar_csv_button').addEventListener('click', exportarProdutosCsv);
 
         function renderizarDados(dados) {
             const fInfo = document.getElementById('fornecedor_info');
