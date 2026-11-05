@@ -55,6 +55,8 @@ O frontend mostra:
 - quantidade de itens
 - tabela com todos os produtos, custo da nota, custo real e preço sugerido
 
+Todos os campos e valores financeiros seguem o padrão brasileiro, com separador de milhar em pontos e decimal em vírgula, por exemplo: `R$10.000,00`.
+
 ---
 
 ## Estrutura do projeto
@@ -225,7 +227,7 @@ Em um terminal:
 ```bash
 cd /home/alan/Desenv/Jerusalem/notaFiscal
 source .venv/bin/activate
-python main.py
+python3 main.py
 ```
 
 Em outro terminal:

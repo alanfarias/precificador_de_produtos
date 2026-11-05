@@ -28,6 +28,10 @@
 
         * { box-sizing: border-box; }
 
+        .hidden {
+            display: none !important;
+        }
+
         html { scroll-behavior: smooth; }
 
         body {
@@ -300,6 +304,29 @@
             transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
         }
 
+        .money-input-wrap,
+        .final-input-wrap {
+            position: relative;
+            display: block;
+        }
+
+        .money-prefix {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-family: "SFMono-Regular", Consolas, monospace;
+            font-size: 0.95rem;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .money-input,
+        .final-input {
+            padding-left: 42px !important;
+        }
+
         .input-shell:focus {
             border-color: rgba(122, 162, 255, 0.75);
             box-shadow: 0 0 0 4px rgba(122, 162, 255, 0.12);
@@ -451,8 +478,9 @@
         }
 
         .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
+            display: flex;
+            flex-wrap: wrap;
+            align-items: stretch;
             gap: 14px;
             padding: 16px 22px 20px;
             border-bottom: 1px solid var(--border);
@@ -460,11 +488,57 @@
         }
 
         .stat-card {
+            flex: 0 0 180px;
             padding: 18px 18px 16px;
             border-radius: 18px;
             border: 1px solid var(--border);
             background: linear-gradient(180deg, rgba(21, 35, 54, 0.88), rgba(17, 26, 39, 0.9));
             min-height: 110px;
+        }
+
+        .info-card {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            flex: 0 0 auto;
+            min-height: 110px;
+            padding: 14px 16px;
+            border-radius: 18px;
+            border: 1px solid rgba(122, 162, 255, 0.18);
+            background: rgba(122, 162, 255, 0.06);
+            color: #dfe9ff;
+            transition: opacity 0.18s ease, transform 0.18s ease;
+        }
+
+        .info-card:hover {
+            transform: translateY(-1px);
+        }
+
+        .info-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: 1px solid rgba(122, 162, 255, 0.32);
+            background: rgba(122, 162, 255, 0.12);
+            font-size: 0.78rem;
+            font-weight: 700;
+            line-height: 1;
+            color: #dfe9ff;
+            user-select: none;
+            flex-shrink: 0;
+        }
+
+        .info-label {
+            font-size: 0.68rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            font-weight: 700;
+            line-height: 1.35;
+            color: #dfe9ff;
+            max-width: 180px;
         }
 
         .stat-card .stat-label {
@@ -554,9 +628,10 @@
             border: 1px solid rgba(109, 227, 166, 0.25);
             background: rgba(9, 17, 26, 0.9);
             color: #dfffea;
-            padding: 10px 12px 10px 32px;
+            padding: 10px 12px 10px 42px;
             outline: none;
             font-family: "SFMono-Regular", Consolas, monospace;
+            text-align: right;
         }
 
         .final-input-wrap {
@@ -571,6 +646,8 @@
             transform: translateY(-50%);
             color: var(--text-muted);
             font-family: "SFMono-Regular", Consolas, monospace;
+            z-index: 1;
+            pointer-events: none;
         }
 
         @media (max-width: 1100px) {
@@ -644,15 +721,21 @@
                             <h3>Calculadora de despesas fixas</h3>
                             <div class="field">
                                 <label class="label" for="despesas_fixas_mensais">Despesas fixas mensais (R$)</label>
-                                <input class="input-shell" type="number" id="despesas_fixas_mensais" value="5000" min="0" step="0.01">
+                                <div class="money-input-wrap">
+                                    <span class="money-prefix">R$</span>
+                                    <input class="input-shell money-input" type="text" id="despesas_fixas_mensais" value="20.000,00" inputmode="decimal" data-raw-value="20000">
+                                </div>
                             </div>
                             <div class="field" style="margin-top: 12px;">
                                 <label class="label" for="faturamento_mensal">Faturamento mensal estimado (R$)</label>
-                                <input class="input-shell" type="number" id="faturamento_mensal" value="30000" min="0" step="0.01">
+                                <div class="money-input-wrap">
+                                    <span class="money-prefix">R$</span>
+                                    <input class="input-shell money-input" type="text" id="faturamento_mensal" value="75.000,00" inputmode="decimal" data-raw-value="75000">
+                                </div>
                             </div>
                             <div class="helper-output">
                                 <span class="label">Percentual sugerido</span>
-                                <strong id="percentual_despesas_fixas">16,67%</strong>
+                                <strong id="percentual_despesas_fixas">26.67%</strong>
                             </div>
                             <button type="button" id="aplicar_pct_fixo" class="action-button">Usar no cálculo</button>
                         </div>
@@ -702,6 +785,10 @@
                             <span class="stat-label">Itens</span>
                             <strong id="total_itens">0</strong>
                         </div>
+                        <div id="info_calculo_custo" class="info-card hidden" title="Custo real = participação do item na nota + rateio de frete/seguro/outros + impostos proporcionais dividido pela quantidade." aria-label="Como o custo real foi calculado">
+                            <span class="info-icon">i</span>
+                            <span class="info-label">Como o custo foi calculado</span>
+                        </div>
                     </div>
 
                     <div class="table-wrap">
@@ -725,6 +812,107 @@
 
     <script>
         const API_URL = 'http://127.0.0.1:8000/api/processar-xml';
+        let produtosAtuais = [];
+
+        function parseValorMonetario(valor) {
+            if (valor === null || valor === undefined || valor === '') {
+                return 0;
+            }
+
+            const texto = String(valor).trim().replace(/\s+/g, '');
+            if (!texto || texto === '-' || texto === '+') {
+                return 0;
+            }
+
+            const semMoeda = texto.replace(/R\$/g, '').replace(/[^\d,.-]/g, '');
+            if (!semMoeda) {
+                return 0;
+            }
+
+            if (semMoeda.includes(',') && semMoeda.includes('.')) {
+                const ultimoSeparadorVirgula = semMoeda.lastIndexOf(',');
+                const ultimoSeparadorPonto = semMoeda.lastIndexOf('.');
+                const decimalSeparator = ultimoSeparadorVirgula > ultimoSeparadorPonto ? ',' : '.';
+                const groupSeparator = decimalSeparator === ',' ? '.' : ',';
+                const normalizado = semMoeda
+                    .replace(new RegExp(`\\${groupSeparator}`, 'g'), '')
+                    .replace(decimalSeparator, '.');
+                const numero = Number(normalizado);
+                return Number.isFinite(numero) ? numero : 0;
+            }
+
+            if (semMoeda.includes(',')) {
+                const [inteiro, decimal = ''] = semMoeda.split(',');
+                const parteDecimal = decimal.slice(0, 2);
+                const numero = Number(`${inteiro.replace(/\./g, '')}.${parteDecimal}`);
+                return Number.isFinite(numero) ? numero : 0;
+            }
+
+            if (semMoeda.includes('.')) {
+                const partes = semMoeda.split('.');
+                const ultimaParte = partes[partes.length - 1];
+                if (partes.length > 2 || ultimaParte.length <= 2) {
+                    const numero = Number(semMoeda);
+                    return Number.isFinite(numero) ? numero : 0;
+                }
+                const numero = Number(semMoeda.replace(/\./g, ''));
+                return Number.isFinite(numero) ? numero : 0;
+            }
+
+            const numero = Number(semMoeda);
+            return Number.isFinite(numero) ? numero : 0;
+        }
+
+        function formatarNumeroMoeda(valor) {
+            const numero = Number(valor) || 0;
+            return numero.toLocaleString('pt-BR', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
+        function formatarMoeda(valor) {
+            return `R$${formatarNumeroMoeda(valor)}`;
+        }
+
+        function formatarValorInputMoeda(valor) {
+            return formatarNumeroMoeda(valor);
+        }
+
+        function configurarInputMoeda(input, valor) {
+            const rawValue = parseValorMonetario(valor);
+            input.dataset.rawValue = String(rawValue);
+            input.value = formatarValorInputMoeda(rawValue);
+            input.setAttribute('type', 'text');
+            input.setAttribute('inputmode', 'decimal');
+
+            input.addEventListener('focus', () => {
+                const rawNumeric = parseValorMonetario(input.dataset.rawValue ?? rawValue);
+                input.value = rawNumeric.toFixed(2).replace('.', ',');
+            });
+
+            input.addEventListener('blur', () => {
+                const numericValue = parseValorMonetario(input.value);
+                input.dataset.rawValue = String(numericValue);
+                input.value = formatarValorInputMoeda(numericValue);
+            });
+        }
+
+        function configurarCampoMonetario(input) {
+            input.setAttribute('type', 'text');
+            input.setAttribute('inputmode', 'decimal');
+            input.addEventListener('focus', () => {
+                const valor = parseValorMonetario(input.dataset.rawValue ?? input.value);
+                input.value = valor.toFixed(2).replace('.', ',');
+            });
+            input.addEventListener('blur', () => {
+                const valor = parseValorMonetario(input.value);
+                input.dataset.rawValue = String(valor);
+                input.value = formatarValorInputMoeda(valor);
+            });
+            input.dataset.rawValue = String(parseValorMonetario(input.value));
+            input.value = formatarValorInputMoeda(parseValorMonetario(input.value));
+        }
 
         const fileInput = document.getElementById('xml_file');
         const fileNameBox = document.getElementById('file_name');
@@ -735,8 +923,8 @@
         const aplicarPctFixoButton = document.getElementById('aplicar_pct_fixo');
 
         function calcularPercentualDespesasFixas() {
-            const despesasFixasMensais = Number(despesasFixasMensaisInput.value) || 0;
-            const faturamentoMensal = Number(faturamentoMensalInput.value) || 0;
+            const despesasFixasMensais = parseValorMonetario(despesasFixasMensaisInput.value);
+            const faturamentoMensal = parseValorMonetario(faturamentoMensalInput.value);
 
             if (faturamentoMensal <= 0) {
                 percentualDespesasFixasLabel.textContent = '0,00%';
@@ -748,6 +936,8 @@
             return percentual;
         }
 
+        configurarCampoMonetario(despesasFixasMensaisInput);
+        configurarCampoMonetario(faturamentoMensalInput);
         despesasFixasMensaisInput.addEventListener('input', calcularPercentualDespesasFixas);
         faturamentoMensalInput.addEventListener('input', calcularPercentualDespesasFixas);
 
@@ -798,6 +988,34 @@
             }
         });
 
+        function hasCustoRealDiferenteDoCustoNota(produto) {
+            const custoNota = Number(produto.custo_unitario_xml) || 0;
+            const custoReal = Number(produto.custo_unitario_real) || 0;
+            return Math.abs(custoNota - custoReal) > 0.0001;
+        }
+
+        function atualizarIndicadorCalculo(dados) {
+            const infoCard = document.getElementById('info_calculo_custo');
+            if (!infoCard) return;
+
+            const temDiferenca = Array.isArray(dados?.produtos) && dados.produtos.some(hasCustoRealDiferenteDoCustoNota);
+
+            if (temDiferenca) {
+                infoCard.classList.remove('hidden');
+                infoCard.setAttribute('title', 'Custo real = participação do item na nota + rateio de frete/seguro/outros + impostos proporcionais dividido pela quantidade.');
+            } else {
+                infoCard.classList.add('hidden');
+            }
+        }
+
+        function atualizarResumoFinanceiro() {
+            const totalItens = produtosAtuais.length;
+            const totalItensEl = document.getElementById('total_itens');
+            if (totalItensEl) {
+                totalItensEl.textContent = totalItens;
+            }
+        }
+
         function renderizarDados(dados) {
             const fInfo = document.getElementById('fornecedor_info');
             fInfo.innerHTML = `
@@ -809,31 +1027,45 @@
             `;
             fInfo.classList.add('visible');
 
+            produtosAtuais = dados.produtos.map((prod) => ({
+                ...prod,
+                preco_final: Number(prod.preco_venda_sugerido) || 0
+            }));
+
             const tbody = document.getElementById('produtos_tabela_body');
             tbody.innerHTML = '';
 
-            dados.produtos.forEach((prod) => {
+            dados.produtos.forEach((prod, index) => {
+                const precoFinal = Number(produtosAtuais[index].preco_final ?? prod.preco_venda_sugerido) || 0;
+
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>
                         <div class="product-name">${prod.descricao}</div>
                         <span class="product-code">Cód: ${prod.codigo}</span>
                     </td>
-                    <td class="mono">R$ ${prod.custo_unitario_xml.toFixed(2)}</td>
-                    <td class="mono">R$ ${prod.custo_unitario_real.toFixed(2)}</td>
-                    <td class="mono price-suggested">R$ ${prod.preco_venda_sugerido.toFixed(2)}</td>
+                    <td class="mono">${formatarMoeda(prod.custo_unitario_xml)}</td>
+                    <td class="mono">${formatarMoeda(prod.custo_unitario_real)}</td>
+                    <td class="mono price-suggested">${formatarMoeda(prod.preco_venda_sugerido)}</td>
                     <td>
                         <div class="final-input-wrap">
                             <span>R$</span>
-                            <input type="number" step="0.01" value="${prod.preco_venda_sugerido.toFixed(2)}" class="final-input">
+                            <input type="text" class="final-input" value="${formatarValorInputMoeda(precoFinal)}">
                         </div>
                     </td>
                 `;
+
+                const finalInput = tr.querySelector('.final-input');
+                configurarInputMoeda(finalInput, precoFinal);
+                finalInput.addEventListener('blur', () => {
+                    produtosAtuais[index].preco_final = parseValorMonetario(finalInput.value);
+                    atualizarResumoFinanceiro();
+                });
                 tbody.appendChild(tr);
             });
 
-            const totalItens = dados.produtos.length;
-            document.getElementById('total_itens').textContent = totalItens;
+            atualizarResumoFinanceiro();
+            atualizarIndicadorCalculo(dados);
             document.getElementById('resultado_container').classList.remove('hidden');
         }
     </script>
