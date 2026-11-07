@@ -858,7 +858,7 @@
     </div>
 
     <script>
-        const API_URL = 'http://127.0.0.1:8000/api/processar-xml';
+        const API_URL = window.__APP_API_URL || '/api/processar-xml';
         let produtosAtuais = [];
         let dadosFornecedor = null;
 
@@ -1009,15 +1009,13 @@
 
             const formData = new FormData();
             formData.append('file', file);
-
-            const url = new URL(API_URL);
-            url.searchParams.set('pct_fixo', pctFixo);
-            url.searchParams.set('pct_simples', pctSimples);
-            url.searchParams.set('pct_cartao', pctCartao);
-            url.searchParams.set('pct_lucro', pctLucro);
+            formData.append('pct_fixo', pctFixo);
+            formData.append('pct_simples', pctSimples);
+            formData.append('pct_cartao', pctCartao);
+            formData.append('pct_lucro', pctLucro);
 
             try {
-                const response = await fetch(url, {
+                const response = await fetch(API_URL, {
                     method: 'POST',
                     body: formData
                 });

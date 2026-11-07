@@ -158,7 +158,9 @@ E então abrir:
 http://127.0.0.1:8001
 ```
 
-> Importante: o frontend está apontando para a API do backend em `http://127.0.0.1:8000/api/processar-xml`.
+> Importante: em produção, o frontend precisa apontar para o mesmo domínio do backend ou para uma URL customizada via `window.__APP_API_URL`. O valor padrão usa a origem atual do navegador para chamar `/api/processar-xml`, evitando o problema de `127.0.0.1` em deploys remotos.
+
+Além disso, o backend aceita upload do XML pela interface do navegador ou também pode processar um arquivo já presente na pasta `xml/` no servidor, passando `filename` no formulário da requisição.
 
 ---
 
