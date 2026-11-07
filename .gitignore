@@ -12,7 +12,9 @@ Thumbs.db
 *.log
 
 # Ignorar modulos do python
-_*
+__pycache__/
+*.py[cod]
+.venv/
 
 # Arquivos de xml (NF)
 /xml/*.xml

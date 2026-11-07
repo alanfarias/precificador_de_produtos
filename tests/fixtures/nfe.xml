@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NFe xmlns="http://www.portalfiscal.inf.br/nfe">
+  <infNFe>
+    <emit>
+      <CNPJ>12345678000199</CNPJ>
+      <xNome>Fornecedor de Teste</xNome>
+    </emit>
+    <det nItem="1">
+      <prod>
+        <cProd>SKU-1</cProd>
+        <cEAN>7891234567890</cEAN>
+        <xProd>Produto de Teste</xProd>
+        <qCom>2.0000</qCom>
+        <vUnCom>50.00</vUnCom>
+        <vProd>100.00</vProd>
+      </prod>
+      <imposto>
+        <IPI><IPITrib><vIPI>5.00</vIPI></IPITrib></IPI>
+        <ICMS><ICMS10><vICMSST>3.00</vICMSST></ICMS10></ICMS>
+      </imposto>
+    </det>
+    <total>
+      <ICMSTot>
+        <vProd>100.00</vProd>
+        <vFrete>10.00</vFrete>
+        <vSeg>2.00</vSeg>
+        <vOutro>3.00</vOutro>
+      </ICMSTot>
+    </total>
+  </infNFe>
+</NFe>

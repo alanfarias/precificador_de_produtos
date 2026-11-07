@@ -1,261 +1,173 @@
 # Preçificador de Produtos - NF-e
 
-Este projeto foi desenvolvido para processar arquivos XML de Nota Fiscal Eletrônica (NF-e), identificar os produtos e calcular um preço de venda sugerido com base em custos, despesas, impostos e margem de lucro desejada.
+Aplicação web para ler arquivos XML de NF-e, calcular custo real dos produtos e
+sugerir preços de venda. O backend usa FastAPI; a interface é HTML, CSS e
+JavaScript e é servida pelo próprio backend.
 
-A aplicação é composta por duas partes:
-
-- Backend em Python com FastAPI
-- Frontend em HTML + JavaScript puro
-
-O objetivo principal é permitir que o usuário importe um XML da NF-e, ajuste algumas porcentagens e veja os produtos com custo real e preço sugerido de venda.
-
----
-
-## Visão geral do processo
-
-### 1. Importação do XML
-O usuário seleciona um arquivo `.xml` de NF-e no frontend.
-
-### 2. Envio para o backend
-O arquivo é enviado para a API em:
-
-- `POST http://127.0.0.1:8000/api/processar-xml`
-
-### 3. Leitura e análise do XML
-O backend usa a biblioteca padrão `xml.etree.ElementTree` para ler o arquivo e identificar os dados importantes da NF-e, como:
-
-- dados do fornecedor
-- CNPJ / razão social
-- total da nota
-- itens do produto
-- valores de produto, frete, seguro, outros valores e impostos
-
-### 4. Cálculo do custo real
-Para cada item, o sistema:
-
-- calcula a proporção do valor do item no total da nota
-- rateia despesas globais (frete, seguro, outros)
-- soma impostos relevantes
-- divide o custo total pelo quantidade para obter o custo unitário real
-
-### 5. Cálculo do preço sugerido
-A fórmula utilizada considera:
-
-- despesas fixas
-- Simples Nacional
-- taxa do cartão
-- lucro desejado
-
-O cálculo usa uma lógica de markup com base na soma dessas porcentagens, retornando um valor sugerido de venda para cada produto.
-
-### 6. Exibição no frontend
-O frontend mostra:
-
-- fornecedor e CNPJ no cabeçalho dos resultados
-- quantidade de itens
-- tabela com todos os produtos, custo da nota, custo real e preço sugerido
-
-Todos os campos e valores financeiros seguem o padrão brasileiro, com separador de milhar em pontos e decimal em vírgula, por exemplo: `R$10.000,00`.
-
----
-
-## Estrutura do projeto
+## Arquitetura
 
 ```text
-notaFiscal/
-├── main.py
-├── index.html
-├── xml/
-│   └── 41261000376001000135550010000210611000223808.xml
-├── .venv/
-├── requirements.txt
-└── README.md
+app/
+├── api/routes.py             # validação HTTP e upload
+├── domain/
+│   ├── models.py             # modelos internos
+│   └── pricing.py            # cálculo de custo e preço
+├── infrastructure/nfe_xml.py # leitura segura do XML da NF-e
+└── main.py                   # composição da aplicação e páginas
+deploy/
+├── nginx.conf                # proxy reverso para Ubuntu
+└── precificador.service      # serviço systemd de exemplo
+tests/
+└── fixtures/nfe.xml          # XML sintético para testes
 ```
 
-### Arquivos principais
+O navegador e a API usam a mesma origem. O Nginx é opcional para desenvolvimento
+local, mas recomendado na VPS para expor a aplicação, terminar TLS e limitar o
+tamanho dos uploads. O processo FastAPI fica vinculado a `127.0.0.1`; só o Nginx
+deve aceitar conexões públicas.
 
-- `main.py`: backend FastAPI com lógica de processamento do XML
-- `index.html`: frontend para upload do XML e visualização dos resultados
-- `xml/...xml`: exemplo de NF-e para testes
-- `requirements.txt`: dependências do projeto
+## Desenvolvimento local
 
----
-
-## Tecnologias utilizadas
-
-- Python 3
-- FastAPI
-- Uvicorn
-- XML parsing com `ElementTree`
-- HTML + JavaScript
-- CSS customizado para dashboard visual
-
----
-
-## Como executar o projeto
-
-## 1. Entrar na pasta do projeto
-
-```bash
-cd /home/alan/Desenv/Jerusalem/precificador_de_produtos
-```
-
-## 2. Criar ou ativar o ambiente virtual
-
-Se ainda não existir, crie o ambiente:
+Requer Python 3.10 ou superior.
 
 ```bash
 python3 -m venv .venv
-```
-
-Ative o ambiente:
-
-```bash
 source .venv/bin/activate
+python -m pip install -r requirements.txt
+python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
 ```
 
-## 3. Instalar as dependências
+Abra <http://127.0.0.1:8000>. A interface e a API ficam disponíveis no mesmo
+servidor; não inicie `python3 -m http.server` em outro terminal. O comando
+`python3 main.py` continua disponível como atalho de desenvolvimento, também
+com reload.
+
+Execute os testes automatizados com:
 
 ```bash
-pip install fastapi uvicorn python-multipart
+python -m unittest discover -s tests -v
 ```
 
-Ou, se o projeto já tiver `requirements.txt`:
+## Implantação em VPS Ubuntu
+
+Os exemplos abaixo usam `/opt/precificacao_de_produtos`, `www-data`, o domínio
+`exemplo.com` e uma instalação Ubuntu com Python 3. O serviço de exemplo roda
+dois workers; ajuste esse número à memória e à carga da VPS. Esta aplicação não
+tem autenticação de usuários: antes de torná-la pública, restrinja o acesso por
+VPN/firewall ou configure autenticação no proxy reverso.
+
+### 1. Instalar o sistema e preparar o código
 
 ```bash
-pip install -r requirements.txt
+sudo apt update
+sudo apt install -y python3 python3-venv nginx
+sudo mkdir -p /opt/precificacao_de_produtos
 ```
 
-## 4. Rodar o backend
-
-No terminal, execute:
+Copie ou clone o repositório para `/opt/precificacao_de_produtos`. Em seguida:
 
 ```bash
-python3 main.py
+cd /opt/precificacao_de_produtos
+sudo python3 -m venv .venv
+sudo .venv/bin/python -m pip install --upgrade pip
+sudo .venv/bin/python -m pip install -r requirements.txt
 ```
 
-Isso inicia o servidor FastAPI em:
+O código e o ambiente virtual precisam ser legíveis e executáveis pelo usuário
+`www-data`. O serviço não precisa gravar XMLs: os arquivos enviados são
+processados em memória e não são persistidos.
 
-```text
-http://127.0.0.1:8000
-```
+### 2. Ativar o serviço FastAPI
 
-O arquivo `main.py` já está configurado para subir o app com `uvicorn` na porta 8000.
-
-## 5. Abrir o frontend
-
-Abra o arquivo `index.html` no navegador.
-
-Você também pode iniciar um servidor simples para servir a página, caso deseje:
+Revise os caminhos e o usuário em `deploy/precificador.service`, se necessário,
+e instale:
 
 ```bash
-python3 -m http.server 8001
+sudo cp deploy/precificador.service /etc/systemd/system/precificador.service
+sudo systemctl daemon-reload
+sudo systemctl enable --now precificador
+sudo systemctl status precificador
 ```
 
-E então abrir:
-
-```text
-http://127.0.0.1:8001
-```
-
-> Importante: em produção, o frontend precisa apontar para o mesmo domínio do backend ou para uma URL customizada via `window.__APP_API_URL`. O valor padrão usa a origem atual do navegador para chamar `/api/processar-xml`, evitando o problema de `127.0.0.1` em deploys remotos.
-
-Além disso, o backend aceita upload do XML pela interface do navegador ou também pode processar um arquivo já presente na pasta `xml/` no servidor, passando `filename` no formulário da requisição.
-
----
-
-## Como usar no navegador
-
-1. Ajuste os valores das porcentagens no painel lateral:
-   - Despesas Fixas
-   - Simples Nacional
-   - Taxa do Cartão
-   - Lucro Desejado
-2. Use a calculadora de despesas fixas para descobrir o percentual ideal:
-   - informe as despesas fixas mensais
-   - informe o faturamento mensal estimado
-   - o sistema calcula automaticamente a porcentagem e pode aplicá-la ao campo "Despesas Fixas (%)"
-3. Clique em "Importar XML"
-4. Selecione o arquivo `.xml` da NF-e
-5. O backend processa o arquivo e exibe os produtos
-6. Confira o custo real, preço sugerido e tabela de itens
-
----
-
-## Exemplo de XML de teste
-
-O projeto já inclui um arquivo de exemplo em:
-
-```text
-xml/41261000376001000135550010000210611000223808.xml
-```
-
-Esse arquivo pode ser usado para testar o fluxo completo da aplicação.
-
----
-
-## Endpoints da API
-
-### POST `/api/processar-xml`
-
-Recebe:
-
-- `file`: arquivo XML
-- `pct_fixo`: percentual de despesas fixas
-- `pct_simples`: percentual do Simples Nacional
-- `pct_cartao`: percentual da taxa do cartão
-- `pct_lucro`: percentual de lucro desejado
-
-Retorna:
-
-- fornecedor
-- configurações aplicadas
-- lista de produtos com custo e preço sugerido
-
----
-
-## Observações importantes
-
-- O backend utiliza CORS para permitir comunicação com o frontend em ambiente local.
-- O código trata diferentes namespaces de NF-e, garantindo compatibilidade com XMLs que tenham variações no padrão da estrutura.
-- Caso o arquivo não seja válido ou a soma das margens ultrapasse 100%, a API retorna erro com mensagem clara.
-
----
-
-## Como rodar tudo de uma vez
-
-Em um terminal:
+O backend escuta somente em `127.0.0.1:8000`. Para investigar problemas:
 
 ```bash
-cd /home/alan/Desenv/Jerusalem/notaFiscal
-source .venv/bin/activate
-python3 main.py
+sudo journalctl -u precificador -f
+curl http://127.0.0.1:8000/health
 ```
 
-Em outro terminal:
+### 3. Configurar o Nginx
+
+Edite `deploy/nginx.conf` e substitua `exemplo.com` pelo domínio da VPS. Copie e
+ative o site:
 
 ```bash
-cd /home/alan/Desenv/Jerusalem/notaFiscal
-python3 -m http.server 8001
+sudo cp deploy/nginx.conf /etc/nginx/sites-available/precificador
+sudo ln -s /etc/nginx/sites-available/precificador /etc/nginx/sites-enabled/precificador
+sudo nginx -t
+sudo systemctl reload nginx
 ```
 
-Depois abra o front no navegador e teste com um XML de NF-e.
+Configure DNS para apontar o domínio à VPS e libere as portas 80 e 443 no
+firewall da nuvem e no firewall do sistema. Exemplo com UFW:
 
----
+```bash
+sudo ufw allow OpenSSH
+sudo ufw allow 'Nginx Full'
+sudo ufw enable
+```
 
-## Dica de desenvolvimento
+### 4. Habilitar HTTPS
 
-Para uma futura evolução, este projeto pode receber:
+Configure um certificado TLS válido antes de usar a aplicação com dados reais.
+Com Certbot para Nginx, por exemplo:
 
-- upload em múltiplos arquivos
-- exportação em CSV ou Excel
-- edição direta de preços finais
-- cálculo por categoria de produto
-- autenticação e histórico de simulações
-- painel administrativo para gestão de margens por loja
+```bash
+sudo apt install -y certbot python3-certbot-nginx
+sudo certbot --nginx -d exemplo.com -d www.exemplo.com
+```
 
----
+Confira a renovação automática com `sudo certbot renew --dry-run`. Não envie
+credenciais nem certificados ao repositório.
 
-## Conclusão
+Como o aplicativo não possui login próprio, proteja-o no Nginx antes de liberar
+acesso público. Uma opção simples para uma instalação privada é autenticação
+Basic sobre HTTPS:
 
-Este projeto combina processamento de XML, cálculo financeiro e interface web simples para transformar uma NF-e em uma ferramenta prática para precificação de produtos. Ele serve como base sólida para gestão de preços e pode ser expandido para cenários comerciais mais complexos.
+```bash
+sudo apt install -y apache2-utils
+sudo htpasswd -c /etc/nginx/precificador.htpasswd seu_usuario
+sudo chown root:www-data /etc/nginx/precificador.htpasswd
+sudo chmod 640 /etc/nginx/precificador.htpasswd
+```
+
+Adicione estas diretivas ao `server` HTTPS criado pelo Certbot, valide e
+recarregue o Nginx:
+
+```nginx
+auth_basic "Precificador";
+auth_basic_user_file /etc/nginx/precificador.htpasswd;
+```
+
+```bash
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+Alternativamente, restrinja o acesso por VPN/firewall. Não exponha a aplicação
+sem autenticação ou controle equivalente.
+
+## Fluxo e API
+
+`POST /api/processar-xml` recebe um arquivo `file` e os campos de formulário
+opcionais `pct_fixo`, `pct_simples`, `pct_cartao` e `pct_lucro`. Os percentuais
+por padrão são 15, 8.32, 3 e 20. A soma deve ser inferior a 100%. O arquivo é
+limitado a 10 MiB e XMLs com DTD/entidades são rejeitados.
+
+O endpoint também mantém a opção de ler um nome de arquivo da pasta `xml/` do
+servidor; o uso normal da interface é enviar o arquivo diretamente. A rota
+`/health` retorna o estado básico da aplicação para verificações operacionais.
+
+Os arquivos NF-e contêm informações comerciais e podem conter dados pessoais.
+Evite armazená-los no servidor ou em logs sem uma necessidade definida; a
+aplicação não mantém histórico nem salva os uploads.
